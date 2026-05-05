@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Application Form</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .form-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .form-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: #ffffff;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-input.valid {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+        
+        .form-input.invalid {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+        }
+        
+        .emoji-feedback {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .emoji-feedback.show {
+            opacity: 1;
+            animation: bounce 0.6s ease;
+        }
+        
+        .field-hint {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 6px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .field-hint.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .strength-meter {
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .strength-meter.show {
+            opacity: 1;
+        }
+        
+        .strength-bars {
+            display: flex;
+            gap: 4px;
+            margin-top: 5px;
+        }
+        
+        .strength-bar {
+            height: 4px;
+            flex: 1;
+            background: #e2e8f0;
+            border-radius: 2px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .strength-bar.active {
+            background: #10b981;
+        }
+        
+        .strength-bar.medium {
+            background: #f59e0b;
+        }
+        
+        .strength-bar.strong {
+            background: #10b981;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .submit-btn.enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .submit-btn:hover.enabled {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
+        }
+        
+        .typing-indicator {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .typing-dot {
+            width: 4px;
+            height: 4px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 25px 50px rgba(16, 185, 129, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            z-index: 1000;
+        }
+        
+        .success-message.show {
+            opacity: 1;
+            pointer-events: auto;
+            animation: successPulse 0.6s ease;
+        }
+        
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(-50%); }
+            40% { transform: translateY(-70%); }
+            60% { transform: translateY(-60%); }
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        @keyframes successPulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(-15px) rotate(240deg); }
+        }
+        
+        @media (max-width: 640px) {
+            .form-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .form-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="floating-elements">
+            <div class="floating-shape" style="top: 10%; left: 80%; width: 20px; height: 20px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; animation-delay: 0s;"></div>
+            <div class="floating-shape" style="top: 70%; left: 10%; width: 15px; height: 15px; background: linear-gradient(45deg, #10b981, #059669); border-radius: 30%; animation-delay: 2s;"></div>
+            <div class="floating-shape" style="top: 30%; right: 90%; width: 25px; height: 25px; background: linear-gradient(45deg, #f59e0b, #d97706); border-radius: 20%; animation-delay: 4s;"></div>
+        </div>
+        
+        <div class="form-header">
+            <h1 class="form-title">Smart Application</h1>
+            <p class="form-subtitle">Experience intelligent form interaction</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <form id="personalityForm">
+            <div class="form-group">
+                <label class="form-label" for="name">Full Name</label>
+                <div style="position: relative;">
+                    <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name">
+                    <div class="emoji-feedback" id="nameEmoji"></div>
+                    <div class="typing-indicator" id="nameTyping">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+                <div class="field-hint" id="nameHint">We'll personalize your experience</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <div style="position: relative;">
+                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@company.com">
+                    <div class="emoji-feedback" id="emailEmoji"></div>
+                </div>
+                <div class="field-hint" id="emailHint">We'll send updates to this address</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="role">Professional Role</label>
+                <div style="position: relative;">
+                    <select id="role" name="role" class="form-select">
+                        <option value="">Select your role</option>
+                        <option value="developer">Software Developer</option>
+                        <option value="designer">UI/UX Designer</option>
+                        <option value="manager">Product Manager</option>
+                        <option value="analyst">Data Analyst</option>
+                        <option value="engineer">System Engineer</option>
+                        <option value="marketing">Marketing Specialist</option>
+                        <option value="sales">Sales Representative</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <div class="emoji-feedback" id="roleEmoji"></div>
+                </div>
+                <div class="field-hint" id="roleHint">Choose the role that best describes you</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="experience">Years of Experience</label>
+                <div style="position: relative;">
+                    <input type="number" id="experience" name="experience" class="form-input" placeholder="5" min="0" max="50">
+                    <div class="emoji-feedback" id="experienceEmoji"></div>
+                </div>
+                <div class="field-hint" id="experienceHint">Your professional journey matters</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Create Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter a secure password">
+                    <div class="emoji-feedback" id="passwordEmoji"></div>
+                </div>
+                <div class="strength-meter" id="strengthMeter">
+                    <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">Password Strength: <span id="strengthText">Weak</span></div>
+                    <div class="strength-bars">
+                        <div class="strength-bar" id="bar1"></div>
+                        <div class="strength-bar" id="bar2"></div>
+                        <div class="strength-bar" id="bar3"></div>
+                        <div class="strength-bar" id="bar4"></div>
+                    </div>
+                </div>
+                <div class="field-hint" id="passwordHint">Use 8+ characters with mixed case, numbers & symbols</div>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                ✨ Complete Application
+            </button>
+        </form>
+    </div>
+    
+    <div class="success-message" id="successMessage">
+        🎉 Application submitted successfully!
+    </div>
+
+    <script>
+        class PersonalityForm {
+            constructor() {
+                this.fields = {
+                    name: { element: document.getElementById('name'), completed: false },
+                    email: { element: document.getElementById('email'), completed: false },
+                    role: { element: document.getElementById('role'), completed: false },
+                    experience: { element: document.getElementById('experience'), completed: false },
+                    password: { element: document.getElementById('password'), completed: false }
+                };
+                
+                this.totalFields = Object.keys(this.fields).length;
+                this.completedFields = 0;
+                this.isTyping = {};
+                
+                this.initializeEventListeners();
+                this.updateProgress();
+            }
+            
+            initializeEventListeners() {
+                // Name field with confetti and typing indicator
+                this.fields.name.element.addEventListener('input', (e) => {
+                    this.handleTyping('name');
+                    this.handleNameInput(e.target.value);
+                });
+                
+                this.fields.name.element.addEventListener('blur', () => {
+                    this.hideTypingIndicator('name');
+                });
+                
+                // Email validation
+                this.fields.email.element.addEventListener('input', (e) => {
+                    this.handleEmailInput(e.target.value);
+                });
+                
+                // Role selection with emoji feedback
+                this.fields.role.element.addEventListener('change', (e) => {
+                    this.handleRoleSelection(e.target.value);
+                });
+                
+                // Experience with dynamic feedback
+                this.fields.experience.element.addEventListener('input', (e) => {
+                    this.handleExperienceInput(e.target.value);
+                });
+                
+                // Password strength meter
+                this.fields.password.element.addEventListener('input', (e) => {
+                    this.handlePasswordInput(e.target.value);
+                });
+                
+                // Form submission
+                document.getElementById('personalityForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleSubmit();
+                });
+            }
+            
+            handleTyping(fieldName) {
+                if (!this.isTyping[fieldName]) {
+                    this.isTyping[fieldName] = true;
+                    this.showTypingIndicator(fieldName);
+                    
+                    setTimeout(() => {
+                        this.isTyping[fieldName] = false;
+                        this.hideTypingIndicator(fieldName);
+                    }, 1000);
+                }
+            }
+            
+            showTypingIndicator(fieldName) {
+                const indicator = document.getElementById(`${fieldName}Typing`);
+                if (indicator) {
+                    indicator.style.opacity = '1';
+                }
+            }
+            
+            hideTypingIndicator(fieldName) {
+                const indicator = document.getElementById(`${fieldName}Typing`);
+                if (indicator) {
+                    indicator.style.opacity = '0';
+                }
+            }
+            
+            handleNameInput(value) {
+                const emoji = document.getElementById('nameEmoji');
+                const hint = document.getElementById('nameHint');
+                const field = this.fields.name.element;
+                
+                if (value.length > 0) {
+                    hint.classList.add('show');
+                    
+                    if (value.length >= 2) {
+                        field.classList.add('valid');
+                        field.classList.remove('invalid');
+                        emoji.textContent = '👋';
+                        emoji.classList.add('show');
+                        this.setFieldCompleted('name', true);
+                        
+                        // Trigger confetti for first name completion
+                        if (value.length === 2) {
+                            this.createConfetti();
+                        }
+                    } else {
+                        field.classList.remove('valid', 'invalid');
+                        emoji.classList.remove('show');
+                        this.setFieldCompleted('name', false);
+                    }
+                } else {
+                    hint.classList.remove('show');
+                    field.classList.remove('valid', 'invalid');
+                    emoji.classList.remove('show');
+                    this.setFieldCompleted('name', false);
+                }
+            }
+            
+            handleEmailInput(value) {
+                const emoji = document.getElementById('emailEmoji');
+                const hint = document.getElementById('emailHint');
+                const field = this.fields.email.element;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (value.length > 0) {
+                    hint.classList.add('show');
+                    
+                    if (emailRegex.test(value)) {
+                        field.classList.add('valid');
+                        field.classList.remove('invalid');
+                        emoji.textContent = '📧';
+                        emoji.classList.add('show');
+                        this.setFieldCompleted('email', true);
+                    } else {
+                        field.classList.add('invalid');
+                        field.classList.remove('valid');
+                        emoji.textContent = '❌';
+                        emoji.classList.add('show');
+                        this.setFieldCompleted('email', false);
+                    }
+                } else {
+                    hint.classList.remove('show');
+                    field.classList.remove('valid', 'invalid');
+                    emoji.classList.remove('show');
+                    this.setFieldCompleted('email', false);
+                }
+            }
+            
+            handleRoleSelection(value) {
+                const emoji = document.getElementById('roleEmoji');
+                const hint = document.getElementById('roleHint');
+                const field = this.fields.role.element;
+                
+                const roleEmojis = {
+                    developer: '👨‍💻',
+                    designer: '🎨',
+                    manager: '📊',
+                    analyst: '📈',
+                    engineer: '⚙️',
+                    marketing: '📢',
+                    sales: '💼',
+                    other: '🌟'
+                };
+                
+                if (value) {
+                    hint.classList.add('show');
+                    field.classList.add('valid');
+                    emoji.textContent = roleEmojis[value] || '🌟';
+                    emoji.classList.add('show');
+                    this.setFieldCompleted('role', true);
+                    
+                    // Special effect for developer role
+                    if (value === 'developer') {
+                        this.createCodeRain();
+                    }
+                } else {
+                    hint.classList.remove('show');
+                    field.classList.remove('valid');
+                    emoji.classList.remove('show');
+                    this.setFieldCompleted('role', false);
+                }
+            }
+            
+            handleExperienceInput(value) {
+                const emoji = document.getElementById('experienceEmoji');
+                const hint = document.getElementById('experienceHint');
+                const field = this.fields.experience.element;
+                const years = parseInt(value);
+                
+                if (value && years >= 0) {
+                    hint.classList.add('show');
+                    field.classList.add('valid');
+                    
+                    if (years === 0) {
+                        emoji.textContent = '🌱';
+                        hint.textContent = 'Everyone starts somewhere!';
+                    } else if (years <= 2) {
+                        emoji.textContent = '🚀';
+                        hint.textContent = 'Great start to your career!';
+                    } else if (years <= 5) {
+                        emoji.textContent = '⭐';
+                        hint.textContent = 'Building solid experience!';
+                    } else if (years <= 10) {
+                        emoji.textContent = '🏆';
+                        hint.textContent = 'Impressive experience level!';
+                    } else {
+                        emoji.textContent = '👑';
+                        hint.textContent = 'Veteran professional!';
+                    }
+                    
+                    emoji.classList.add('show');
+                    this.setFieldCompleted('experience', true);
+                } else {
+                    hint.classList.remove('show');
+                    field.classList.remove('valid');
+                    emoji.classList.remove('show');
+                    this.setFieldCompleted('experience', false);
+                }
+            }
+            
+            handlePasswordInput(value) {
+                const emoji = document.getElementById('passwordEmoji');
+                const strengthMeter = document.getElementById('strengthMeter');
+                const strengthText = document.getElementById('strengthText');
+                const field = this.fields.password.element;
+                const hint = document.getElementById('passwordHint');
+                
+                if (value.length > 0) {
+                    strengthMeter.classList.add('show');
+                    hint.classList.add('show');
+                    
+                    const strength = this.calculatePasswordStrength(value);
+                    this.updateStrengthMeter(strength);
+                    
+                    if (strength >= 3) {
+                        field.classList.add('valid');
+                        field.classList.remove('invalid');
+                        emoji.textContent = '🔒';
+                        emoji.classList.add('show');
+                        strengthText.textContent = 'Strong';
+                        this.setFieldCompleted('password', true);
+                    } else if (strength >= 2) {
+                        field.classList.remove('valid', 'invalid');
+                        emoji.textContent = '🔐';
+                        emoji.classList.add('show');
+                        strengthText.textContent = 'Medium';
+                        this.setFieldCompleted('password', false);
+                    } else {
+                        field.classList.add('invalid');
+                        field.classList.remove('valid');
+                        emoji.textContent = '🔓';
+                        emoji.classList.add('show');
+                        strengthText.textContent = 'Weak';
+                        this.setFieldCompleted('password', false);
+                    }
+                } else {
+                    strengthMeter.classList.remove('show');
+                    hint.classList.remove('show');
+                    field.classList.remove('valid', 'invalid');
+                    emoji.classList.remove('show');
+                    this.setFieldCompleted('password', false);
+                }
+            }
+            
+            calculatePasswordStrength(password) {
+                let strength = 0;
+                
+                if (password.length >= 8) strength++;
+                if (/[a-z]/.test(password)) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+                
+                return Math.min(strength, 4);
+            }
+            
+            updateStrengthMeter(strength) {
+                const bars = ['bar1', 'bar2', 'bar3', 'bar4'];
+                
+                bars.forEach((barId, index) => {
+                    const bar = document.getElementById(barId);
+                    bar.classList.remove('active', 'medium', 'strong');
+                    
+                    if (index < strength) {
+                        if (strength <= 2) {
+                            bar.classList.add('active');
+                        } else if (strength === 3) {
+                            bar.classList.add('medium');
+                        } else {
+                            bar.classList.add('strong');
+                        }
+                    }
+                });
+            }
+            
+            setFieldCompleted(fieldName, completed) {
+                const wasCompleted = this.fields[fieldName].completed;
+                this.fields[fieldName].completed = completed;
+                
+                if (completed && !wasCompleted) {
+                    this.completedFields++;
+                } else if (!completed && wasCompleted) {
+                    this.completedFields--;
+                }
+                
+                this.updateProgress();
+                this.updateSubmitButton();
+            }
+            
+            updateProgress() {
+                const progress = (this.completedFields / this.totalFields) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+            
+            updateSubmitButton() {
+                const submitBtn = document.getElementById('submitBtn');
+                if (this.completedFields === this.totalFields) {
+                    submitBtn.classList.add('enabled');
+                    submitBtn.innerHTML = '🚀 Launch Application';
+                } else {
+                    submitBtn.classList.remove('enabled');
+                    submitBtn.innerHTML = `✨ Complete Application (${this.completedFields}/${this.totalFields})`;
+                }
+            }
+            
+            createConfetti() {
+                const colors = ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444'];
+                
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.classList.add('confetti');
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 3 + 's';
+                        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                        
+                        document.body.appendChild(confetti);
+                        
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, 5000);
+                    }, i * 100);
+                }
+            }
+            
+            createCodeRain() {
+                const codeSymbols = ['{ }', '< >', '[ ]', '( )', '===', '!==', '=>', '&&', '||'];
+                
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const code = document.createElement('div');
+                        code.textContent = codeSymbols[Math.floor(Math.random() * codeSymbols.length)];
+                        code.style.position = 'fixed';
+                        code.style.left = Math.random() * 100 + '%';
+                        code.style.top = '-50px';
+                        code.style.color = '#10b981';
+                        code.style.fontSize = '14px';
+                        code.style.fontFamily = 'monospace';
+                        code.style.pointerEvents = 'none';
+                        code.style.zIndex = '1000';
+                        code.style.animation = 'confetti-fall 2s linear forwards';
+                        
+                        document.body.appendChild(code);
+                        
+                        setTimeout(() => {
+                            code.remove();
+                        }, 2000);
+                    }, i * 150);
+                }
+            }
+            
+            handleSubmit() {
+                if (this.completedFields === this.totalFields) {
+                    // Show success message
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.classList.add('show');
+                    
+                    // Create celebration effect
+                    this.createConfetti();
+                    
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                    }, 3000);
+                    
+                    // Log form data (in real app, this would be sent to server)
+                    const formData = new FormData(document.getElementById('personalityForm'));
+                    console.log('Form submitted with data:', Object.fromEntries(formData));
+                }
+            }
+        }
+        
+        // Initialize the form when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new PersonalityForm();
+        });
+    </script>
+</body>
+</html>
