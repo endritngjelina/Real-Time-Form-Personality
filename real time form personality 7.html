@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Recruitment Experience</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4285F4;
+            --primary-dark: #3367D6;
+            --secondary: #34A853;
+            --accent: #EA4335;
+            --warning: #FBBC05;
+            --dark: #202124;
+            --dark-gray: #5F6368;
+            --light-gray: #F1F3F4;
+            --white: #FFFFFF;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            color: var(--dark);
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(66, 133, 244, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(52, 168, 83, 0.1) 0%, transparent 20%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            background: var(--white);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-section {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 3rem;
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, 
+                var(--accent) 0%, 
+                var(--warning) 25%, 
+                var(--secondary) 50%, 
+                var(--primary) 75%, 
+                var(--primary-dark) 100%);
+            background-size: 400% 100%;
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 90%;
+        }
+
+        .features {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .features li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+        }
+
+        .features i {
+            background: rgba(255, 255, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .form-container {
+            flex: 1;
+            padding: 3rem;
+            background: var(--white);
+        }
+
+        .form-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            position: relative;
+            display: inline-block;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .form-subtitle {
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            transition: var(--transition);
+            position: relative;
+            padding-left: 12px;
+        }
+
+        .form-label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 0;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: height 0.3s ease;
+        }
+
+        .form-group:focus-within .form-label::before {
+            height: 20px;
+        }
+
+        .form-group:focus-within .form-label {
+            color: var(--primary);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid var(--light-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 400;
+            background: var(--white);
+            transition: var(--transition);
+            color: var(--dark);
+            outline: none;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.15);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--dark-gray);
+            opacity: 0.6;
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235F6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 18px;
+            padding-right: 48px;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .progress-container {
+            margin: 2.5rem 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--dark-gray);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--light-gray);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(66, 133, 244, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .ai-assistant {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .ai-assistant:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .ai-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 320px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .ai-panel.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .ai-header {
+            background: var(--primary);
+            color: white;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-title {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .ai-body {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .ai-message {
+            background: #f1f8fe;
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .ai-message::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            border: 10px solid transparent;
+            border-top-color: #f1f8fe;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            padding: 20px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--dark-gray);
+            border-radius: 50%;
+            animation: typingDots 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .success-animation {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            animation: bounce 1s ease;
+        }
+
+        .success-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .success-subtext {
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        @keyframes typingDots {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .hero-section {
+                padding: 2rem;
+            }
+            
+            .form-container {
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .form-title {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Join Google's Mission</h1>
+                <p class="hero-subtitle">We're looking for passionate individuals who want to make an impact on the world through technology.</p>
+                
+                <ul class="features">
+                    <li>
+                        <i class="fas fa-rocket"></i>
+                        <span>Work on cutting-edge technologies that impact billions</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-users"></i>
+                        <span>Collaborate with world-class engineers and researchers</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-globe"></i>
+                        <span>Help solve the world's most challenging problems</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-heart"></i>
+                        <span>Be part of an inclusive, diverse, and innovative culture</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-header">
+                <h2 class="form-title">Application Form</h2>
+                <p class="form-subtitle">Tell us about your skills, experience, and passion for technology</p>
+            </div>
+
+            <form id="applicationForm">
+                <div class="form-group">
+                    <label class="form-label" for="name">Full Name</label>
+                    <input type="text" id="name" class="form-input" placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" class="form-input" placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="role">Desired Role</label>
+                    <select id="role" class="form-select">
+                        <option value="">Select your desired role</option>
+                        <option value="software-engineer">Software Engineer</option>
+                        <option value="product-manager">Product Manager</option>
+                        <option value="ux-designer">UX Designer</option>
+                        <option value="data-scientist">Data Scientist</option>
+                        <option value="research-scientist">Research Scientist</option>
+                        <option value="technical-program-manager">Technical Program Manager</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="experience">Years of Experience</label>
+                    <input type="number" id="experience" class="form-input" placeholder="Enter years of experience" min="0" max="50">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="skills">Technical Skills</label>
+                    <input type="text" id="skills" class="form-input" placeholder="e.g. Java, Python, Machine Learning, Cloud Computing">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="projects">Notable Projects</label>
+                    <textarea id="projects" class="form-textarea" placeholder="Describe your most significant projects and contributions"></textarea>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Application Progress</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Application
+                </button>
+
+                <div class="success-animation" id="success-animation">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="success-text">Application Submitted!</div>
+                    <div class="success-subtext">Thank you for applying to Google. Our team will review your application.</div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="ai-assistant" id="ai-assistant">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <div class="ai-panel" id="ai-panel">
+        <div class="ai-header">
+            <i class="fas fa-robot"></i>
+            <div class="ai-title">Google Assistant</div>
+        </div>
+        <div class="ai-body" id="ai-messages">
+            <div class="ai-message">
+                Hi there! I'm here to help you with your Google application. Let me know if you have any questions!
+            </div>
+            <div class="typing-indicator" id="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const aiAssistant = document.getElementById('ai-assistant');
+            const aiPanel = document.getElementById('ai-panel');
+            const aiMessages = document.getElementById('ai-messages');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const form = document.getElementById('applicationForm');
+            const submitBtn = document.getElementById('submit-btn');
+            const successAnimation = document.getElementById('success-animation');
+            const progressFill = document.getElementById('progress-fill');
+            const progressPercentage = document.getElementById('progress-percentage');
+            
+            // Form fields
+            const formFields = Array.from(form.querySelectorAll('input, select, textarea'));
+            
+            // Toggle AI panel
+            aiAssistant.addEventListener('click', function() {
+                aiPanel.classList.toggle('active');
+            });
+            
+            // Simulate AI typing
+            setTimeout(() => {
+                typingIndicator.style.display = 'none';
+                
+                const newMessage = document.createElement('div');
+                newMessage.className = 'ai-message';
+                newMessage.innerHTML = "Pro tip: Be specific about your technical skills and include measurable achievements in your project descriptions!";
+                aiMessages.appendChild(newMessage);
+                
+                // Auto scroll to bottom
+                aiMessages.scrollTop = aiMessages.scrollHeight;
+            }, 2000);
+            
+            // Form validation and progress tracking
+            function updateProgress() {
+                let completedFields = 0;
+                
+                formFields.forEach(field => {
+                    if (field.type === 'email') {
+                        if (field.value && validateEmail(field.value)) completedFields++;
+                    } else if (field.type === 'number') {
+                        if (field.value && parseInt(field.value) > 0) completedFields++;
+                    } else {
+                        if (field.value.trim()) completedFields++;
+                    }
+                });
+                
+                const progress = Math.min(100, Math.round((completedFields / formFields.length) * 100));
+                
+                progressFill.style.width = `${progress}%`;
+                progressPercentage.textContent = `${progress}%`;
+                
+                // Update button state
+                submitBtn.disabled = progress < 100;
+            }
+            
+            // Add event listeners to form fields
+            formFields.forEach(field => {
+                field.addEventListener('input', updateProgress);
+                field.addEventListener('change', updateProgress);
+            });
+            
+            // Email validation
+            function validateEmail(email) {
+                const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(email);
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show success animation
+                form.style.display = 'none';
+                successAnimation.style.display = 'block';
+                
+                // Create confetti effect
+                createConfetti();
+            });
+            
+            // Confetti effect
+            function createConfetti() {
+                const colors = ['#4285F4', '#34A853', '#EA4335', '#FBBC05'];
+                
+                for (let i = 0; i < 150; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'fixed';
+                    confetti.style.width = '10px';
+                    confetti.style.height = '10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.left = `${Math.random() * 100}vw`;
+                    confetti.style.top = '-10px';
+                    confetti.style.zIndex = '1000';
+                    confetti.style.pointerEvents = 'none';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Animation
+                    const animation = confetti.animate([
+                        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                        { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                    ], {
+                        duration: Math.random() * 3000 + 2000,
+                        easing: 'cubic-bezier(0,0.9,0.57,1)'
+                    });
+                    
+                    // Remove after animation
+                    animation.onfinish = () => confetti.remove();
+                }
+            }
+            
+            // Initialize progress
+            updateProgress();
+        });
+    </script>
+</body>
+</html>
