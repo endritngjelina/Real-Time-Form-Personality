@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Form Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
+            background-size: 300% 100%;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .form-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            color: #34495e;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .feedback-container {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 24px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        .sparkle {
+            width: 4px;
+            height: 4px;
+            background: #ffd93d;
+            border-radius: 50%;
+            animation: sparkleFloat 2s ease-out forwards;
+        }
+
+        .floating-emoji {
+            font-size: 24px;
+            animation: emojiFloat 2s ease-out forwards;
+        }
+
+        .typing-indicator {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typingDots 1.4s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .personality-message {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .personality-message::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2c3e50;
+        }
+
+        .personality-message.show {
+            opacity: 1;
+            top: -50px;
+        }
+
+        .mood-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 32px;
+            transition: all 0.5s ease;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(400px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sparkleFloat {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes emojiFloat {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-20px) scale(1.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-60px) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        @keyframes typingDots {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .field-glow {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3) !important;
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                margin: 20px;
+                padding: 24px;
+            }
+            
+            .form-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="mood-indicator">😊</div>
+        
+        <div class="form-header">
+            <h1 class="form-title">Tell Us About You</h1>
+            <p class="form-subtitle">Every detail makes this form a little more magical</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+
+        <form id="personalityForm">
+            <div class="form-group">
+                <label class="form-label" for="name">Your Name</label>
+                <input type="text" id="name" class="form-input" placeholder="What should we call you?">
+                <div class="feedback-container"></div>
+                <div class="typing-indicator">
+                    <div class="typing-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+                <div class="personality-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="your.email@example.com">
+                <div class="feedback-container"></div>
+                <div class="personality-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="role">Your Role</label>
+                <select id="role" class="form-select">
+                    <option value="">Select your role...</option>
+                    <option value="developer">Developer</option>
+                    <option value="designer">Designer</option>
+                    <option value="manager">Manager</option>
+                    <option value="marketer">Marketer</option>
+                    <option value="student">Student</option>
+                    <option value="entrepreneur">Entrepreneur</option>
+                    <option value="other">Other</option>
+                </select>
+                <div class="feedback-container"></div>
+                <div class="personality-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="experience">Years of Experience</label>
+                <input type="number" id="experience" class="form-input" placeholder="How many years?" min="0" max="50">
+                <div class="feedback-container"></div>
+                <div class="personality-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="interests">Tell us about your interests</label>
+                <textarea id="interests" class="form-textarea" placeholder="What drives your passion? What excites you most about your field?"></textarea>
+                <div class="feedback-container"></div>
+                <div class="personality-message"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" disabled>
+                Complete Your Journey
+            </button>
+        </form>
+    </div>
+
+    <script>
+        class FormPersonality {
+            constructor() {
+                this.form = document.getElementById('personalityForm');
+                this.progressFill = document.querySelector('.progress-fill');
+                this.submitBtn = document.querySelector('.submit-btn');
+                this.moodIndicator = document.querySelector('.mood-indicator');
+                this.formData = {};
+                this.completedFields = new Set();
+                this.totalFields = 5;
+                
+                this.initializeEventListeners();
+                this.updateMood();
+            }
+
+            initializeEventListeners() {
+                // Name field
+                const nameField = document.getElementById('name');
+                nameField.addEventListener('input', (e) => this.handleNameInput(e));
+                nameField.addEventListener('focus', () => this.showPersonalityMessage(nameField, "Let's start with something personal! ✨"));
+
+                // Email field
+                const emailField = document.getElementById('email');
+                emailField.addEventListener('input', (e) => this.handleEmailInput(e));
+                emailField.addEventListener('focus', () => this.showPersonalityMessage(emailField, "How can we reach this amazing person? 📧"));
+
+                // Role field
+                const roleField = document.getElementById('role');
+                roleField.addEventListener('change', (e) => this.handleRoleChange(e));
+                roleField.addEventListener('focus', () => this.showPersonalityMessage(roleField, "What's your superpower? 🦸‍♀️"));
+
+                // Experience field
+                const experienceField = document.getElementById('experience');
+                experienceField.addEventListener('input', (e) => this.handleExperienceInput(e));
+                experienceField.addEventListener('focus', () => this.showPersonalityMessage(experienceField, "Every journey has its timeline! ⏰"));
+
+                // Interests field
+                const interestsField = document.getElementById('interests');
+                interestsField.addEventListener('input', (e) => this.handleInterestsInput(e));
+                interestsField.addEventListener('focus', () => this.showPersonalityMessage(interestsField, "Tell us what makes your heart sing! 🎵"));
+
+                // Form submission
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+                // Add blur listeners to hide typing indicators
+                document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(field => {
+                    field.addEventListener('blur', () => {
+                        const typingIndicator = field.parentNode.querySelector('.typing-indicator');
+                        if (typingIndicator) {
+                            typingIndicator.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            showPersonalityMessage(field, message) {
+                const messageEl = field.parentNode.querySelector('.personality-message');
+                messageEl.textContent = message;
+                messageEl.classList.add('show');
+                
+                setTimeout(() => {
+                    messageEl.classList.remove('show');
+                }, 3000);
+            }
+
+            showTypingIndicator(field) {
+                const typingIndicator = field.parentNode.querySelector('.typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.style.display = 'block';
+                }
+            }
+
+            hideTypingIndicator(field) {
+                const typingIndicator = field.parentNode.querySelector('.typing-indicator');
+                if (typingIndicator) {
+                    setTimeout(() => {
+                        typingIndicator.style.display = 'none';
+                    }, 500);
+                }
+            }
+
+            handleNameInput(e) {
+                const value = e.target.value.trim();
+                const feedback = e.target.parentNode.querySelector('.feedback-container');
+                
+                this.showTypingIndicator(e.target);
+                
+                if (value.length > 0) {
+                    this.hideTypingIndicator(e.target);
+                    
+                    if (value.length >= 2) {
+                        feedback.innerHTML = '👋';
+                        this.createConfetti(e.target);
+                        this.markFieldComplete('name');
+                        e.target.classList.add('field-glow');
+                        
+                        if (value.length === 2) {
+                            this.showPersonalityMessage(e.target, `Nice to meet you, ${value}! 🤝`);
+                        }
+                    } else {
+                        feedback.innerHTML = '✍️';
+                    }
+                } else {
+                    feedback.innerHTML = '';
+                    this.markFieldIncomplete('name');
+                    e.target.classList.remove('field-glow');
+                }
+                
+                this.updateProgress();
+                this.updateMood();
+            }
+
+            handleEmailInput(e) {
+                const value = e.target.value.trim();
+                const feedback = e.target.parentNode.querySelector('.feedback-container');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                this.showTypingIndicator(e.target);
+                
+                if (value.length > 0) {
+                    this.hideTypingIndicator(e.target);
+                    
+                    if (emailRegex.test(value)) {
+                        feedback.innerHTML = '✅';
+                        this.createSparkles(e.target);
+                        this.markFieldComplete('email');
+                        e.target.classList.add('field-glow');
+                        this.showPersonalityMessage(e.target, "Perfect! We'll keep in touch! 💌");
+                    } else if (value.includes('@')) {
+                        feedback.innerHTML = '📧';
+                    } else {
+                        feedback.innerHTML = '⌨️';
+                    }
+                } else {
+                    feedback.innerHTML = '';
+                    this.markFieldIncomplete('email');
+                    e.target.classList.remove('field-glow');
+                }
+                
+                this.updateProgress();
+                this.updateMood();
+            }
+
+            handleRoleChange(e) {
+                const value = e.target.value;
+                const feedback = e.target.parentNode.querySelector('.feedback-container');
+                
+                const roleEmojis = {
+                    developer: '👨‍💻',
+                    designer: '🎨',
+                    manager: '📊',
+                    marketer: '📈',
+                    student: '🎓',
+                    entrepreneur: '🚀',
+                    other: '🌟'
+                };
+                
+                if (value) {
+                    feedback.innerHTML = roleEmojis[value] || '🌟';
+                    this.createFloatingEmoji(e.target, roleEmojis[value] || '🌟');
+                    this.markFieldComplete('role');
+                    e.target.classList.add('field-glow');
+                    
+                    const messages = {
+                        developer: "Code is poetry! 💻✨",
+                        designer: "Beauty meets function! 🎨🔥",
+                        manager: "Leading the way! 👑",
+                        marketer: "Growth mindset! 📊🚀",
+                        student: "Always learning! 🌱",
+                        entrepreneur: "Changing the world! 🌍⚡",
+                        other: "Unique and awesome! 🦄"
+                    };
+                    
+                    this.showPersonalityMessage(e.target, messages[value] || "Unique and awesome! 🦄");
+                } else {
+                    feedback.innerHTML = '';
+                    this.markFieldIncomplete('role');
+                    e.target.classList.remove('field-glow');
+                }
+                
+                this.updateProgress();
+                this.updateMood();
+            }
+
+            handleExperienceInput(e) {
+                const value = parseInt(e.target.value);
+                const feedback = e.target.parentNode.querySelector('.feedback-container');
+                
+                if (value >= 0) {
+                    let emoji = '🌱';
+                    let message = '';
+                    
+                    if (value === 0) {
+                        emoji = '🌱';
+                        message = "Every expert was once a beginner! 🌟";
+                    } else if (value <= 2) {
+                        emoji = '🌿';
+                        message = "Growing strong! 💪";
+                    } else if (value <= 5) {
+                        emoji = '🌳';
+                        message = "Solid foundation! 🏗️";
+                    } else if (value <= 10) {
+                        emoji = '🏆';
+                        message = "Experienced professional! 👏";
+                    } else {
+                        emoji = '🧙‍♂️';
+                        message = "Wisdom comes with time! 🎯";
+                    }
+                    
+                    feedback.innerHTML = emoji;
+                    this.createFloatingEmoji(e.target, emoji);
+                    this.markFieldComplete('experience');
+                    e.target.classList.add('field-glow');
+                    this.showPersonalityMessage(e.target, message);
+                } else {
+                    feedback.innerHTML = '';
+                    this.markFieldIncomplete('experience');
+                    e.target.classList.remove('field-glow');
+                }
+                
+                this.updateProgress();
+                this.updateMood();
+            }
+
+            handleInterestsInput(e) {
+                const value = e.target.value.trim();
+                const feedback = e.target.parentNode.querySelector('.feedback-container');
+                const wordCount = value.split(/\s+/).filter(word => word.length > 0).length;
+                
+                this.showTypingIndicator(e.target);
+                
+                if (value.length > 10) {
+                    this.hideTypingIndicator(e.target);
+                    
+                    if (wordCount >= 5) {
+                        feedback.innerHTML = '🎉';
+                        this.createConfetti(e.target);
+                        this.markFieldComplete('interests');
+                        e.target.classList.add('field-glow');
+                        this.showPersonalityMessage(e.target, "Your passion shines through! ✨🔥");
+                    } else {
+                        feedback.innerHTML = '💭';
+                    }
+                } else if (value.length > 0) {
+                    feedback.innerHTML = '✍️';
+                } else {
+                    feedback.innerHTML = '';
+                    this.markFieldIncomplete('interests');
+                    e.target.classList.remove('field-glow');
+                }
+                
+                this.updateProgress();
+                this.updateMood();
+            }
+
+            markFieldComplete(fieldName) {
+                this.completedFields.add(fieldName);
+            }
+
+            markFieldIncomplete(fieldName) {
+                this.completedFields.delete(fieldName);
+            }
+
+            updateProgress() {
+                const progress = (this.completedFields.size / this.totalFields) * 100;
+                this.progressFill.style.width = `${progress}%`;
+                
+                this.submitBtn.disabled = this.completedFields.size < this.totalFields;
+                
+                if (this.completedFields.size === this.totalFields) {
+                    this.submitBtn.classList.add('success-animation');
+                    this.submitBtn.textContent = '🚀 Ready to Launch!';
+                } else {
+                    this.submitBtn.classList.remove('success-animation');
+                    this.submitBtn.textContent = `Complete Your Journey (${this.completedFields.size}/${this.totalFields})`;
+                }
+            }
+
+            updateMood() {
+                const progress = this.completedFields.size / this.totalFields;
+                let mood = '😊';
+                
+                if (progress === 0) mood = '😊';
+                else if (progress < 0.3) mood = '🤔';
+                else if (progress < 0.6) mood = '😍';
+                else if (progress < 0.9) mood = '🤩';
+                else mood = '🎉';
+                
+                this.moodIndicator.textContent = mood;
+            }
+
+            createConfetti(element) {
+                const rect = element.getBoundingClientRect();
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#a55eea'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'particle confetti';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = (rect.left + Math.random() * rect.width) + 'px';
+                    confetti.style.top = rect.top + 'px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }
+            }
+
+            createSparkles(element) {
+                const rect = element.getBoundingClientRect();
+                
+                for (let i = 0; i < 8; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'particle sparkle';
+                    sparkle.style.left = (rect.left + Math.random() * rect.width) + 'px';
+                    sparkle.style.top = (rect.top + Math.random() * rect.height) + 'px';
+                    
+                    document.body.appendChild(sparkle);
+                    
+                    setTimeout(() => sparkle.remove(), 2000);
+                }
+            }
+
+            createFloatingEmoji(element, emoji) {
+                const rect = element.getBoundingClientRect();
+                const floatingEmoji = document.createElement('div');
+                floatingEmoji.className = 'particle floating-emoji';
+                floatingEmoji.textContent = emoji;
+                floatingEmoji.style.left = (rect.right - 30) + 'px';
+                floatingEmoji.style.top = (rect.top + rect.height / 2) + 'px';
+                
+                document.body.appendChild(floatingEmoji);
+                
+                setTimeout(() => floatingEmoji.remove(), 2000);
+            }
+
+            handleSubmit(e) {
+                e.preventDefault();
+                
+                if (this.completedFields.size === this.totalFields) {
+                    this.submitBtn.textContent = '🎊 Thank You!';
+                    this.submitBtn.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
+                    
+                    // Create celebration
+                    this.createMassiveConfetti();
+                    this.moodIndicator.textContent = '🥳';
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        alert('🎉 Form submitted successfully! Thanks for the amazing experience!');
+                    }, 1000);
+                } else {
+                    this.form.classList.add('shake');
+                    setTimeout(() => this.form.classList.remove('shake'), 500);
+                }
+            }
+
+            createMassiveConfetti() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#a55eea', '#fd79a8', '#fdcb6e'];
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'particle confetti';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-10px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 5000);
+                }
+            }
+        }
+
+        // Initialize the form personality when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new FormPersonality();
+        });
+    </script>
+</body>
+</html>
