@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Form Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+            background-size: 300% 100%;
+            animation: progressGradient 3s ease-in-out infinite;
+        }
+
+        @keyframes progressGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .form-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .form-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 18px 24px;
+            border: 2px solid #e1e5e9;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-label {
+            position: absolute;
+            top: 50%;
+            left: 24px;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 1.1rem;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+
+        .form-input:focus + .form-label,
+        .form-input:not(:placeholder-shown) + .form-label,
+        .form-select:focus + .form-label,
+        .form-select:not([value=""]) + .form-label {
+            top: -8px;
+            left: 16px;
+            font-size: 0.9rem;
+            color: #667eea;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0 8px;
+            border-radius: 8px;
+        }
+
+        .personality-indicator {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+        }
+
+        .personality-indicator.active {
+            opacity: 1;
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: translateY(-50%) scale(0.3); }
+            50% { transform: translateY(-50%) scale(1.2); }
+            100% { transform: translateY(-50%) scale(1); }
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .floating-element.active {
+            opacity: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            border-radius: 4px;
+            width: 0%;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .dynamic-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            transition: all 1s ease;
+            z-index: 0;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+
+        .typing-indicator {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .completion-celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .skill-tags.active {
+            opacity: 1;
+        }
+
+        .skill-tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            animation: slideInUp 0.4s ease forwards;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .form-insights {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .form-insights.active {
+            opacity: 1;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .insight-icon {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .form-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="dynamic-background"></div>
+        <div class="floating-elements"></div>
+        
+        <div class="form-header">
+            <h1 class="form-title">Creative Application</h1>
+            <p class="form-subtitle">Let your personality shine through</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+
+        <form id="personalityForm">
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" id="name" class="form-input" placeholder=" " autocomplete="name">
+                    <label for="name" class="form-label">Full Name</label>
+                    <div class="personality-indicator" id="nameIndicator"></div>
+                    <div class="typing-indicator" id="nameTyping">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="email" id="email" class="form-input" placeholder=" " autocomplete="email">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="personality-indicator" id="emailIndicator"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <select id="role" class="form-select" value="">
+                        <option value="">Select your role</option>
+                        <option value="developer">Software Developer</option>
+                        <option value="designer">UI/UX Designer</option>
+                        <option value="manager">Product Manager</option>
+                        <option value="marketing">Marketing Specialist</option>
+                        <option value="sales">Sales Representative</option>
+                        <option value="analyst">Data Analyst</option>
+                        <option value="artist">Creative Artist</option>
+                        <option value="writer">Content Writer</option>
+                        <option value="engineer">Systems Engineer</option>
+                        <option value="consultant">Business Consultant</option>
+                    </select>
+                    <label for="role" class="form-label">Professional Role</label>
+                    <div class="personality-indicator" id="roleIndicator"></div>
+                </div>
+                <div class="skill-tags" id="skillTags"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" id="company" class="form-input" placeholder=" " autocomplete="organization">
+                    <label for="company" class="form-label">Current Company</label>
+                    <div class="personality-indicator" id="companyIndicator"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <select id="experience" class="form-select" value="">
+                        <option value="">Years of experience</option>
+                        <option value="entry">0-2 years</option>
+                        <option value="junior">3-5 years</option>
+                        <option value="mid">6-10 years</option>
+                        <option value="senior">11-15 years</option>
+                        <option value="expert">15+ years</option>
+                    </select>
+                    <label for="experience" class="form-label">Experience Level</label>
+                    <div class="personality-indicator" id="experienceIndicator"></div>
+                </div>
+            </div>
+
+            <div class="form-insights" id="formInsights">
+                <h3 style="margin-bottom: 16px; color: #667eea;">✨ Application Insights</h3>
+                <div id="insightsList"></div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Submit Application
+            </button>
+        </form>
+    </div>
+
+    <div class="completion-celebration" id="celebrationContainer"></div>
+
+    <script>
+        class FormPersonality {
+            constructor() {
+                this.formData = {};
+                this.completionScore = 0;
+                this.fieldCount = 5;
+                this.insights = [];
+                this.initializeEventListeners();
+                this.roleSkills = {
+                    developer: ['JavaScript', 'React', 'Node.js', 'Git', 'API Design'],
+                    designer: ['Figma', 'Adobe XD', 'Prototyping', 'User Research', 'Visual Design'],
+                    manager: ['Strategy', 'Roadmapping', 'Analytics', 'Stakeholder Management', 'Agile'],
+                    marketing: ['SEO', 'Content Strategy', 'Social Media', 'Analytics', 'Campaigns'],
+                    sales: ['CRM', 'Lead Generation', 'Negotiation', 'Client Relations', 'Pipeline Management'],
+                    analyst: ['SQL', 'Python', 'Tableau', 'Statistics', 'Machine Learning'],
+                    artist: ['Digital Art', 'Illustration', 'Color Theory', 'Composition', 'Creative Suite'],
+                    writer: ['Copywriting', 'SEO Writing', 'Content Strategy', 'Editing', 'Research'],
+                    engineer: ['System Architecture', 'DevOps', 'Cloud Platforms', 'Monitoring', 'Security'],
+                    consultant: ['Business Analysis', 'Process Improvement', 'Client Relations', 'Strategy', 'Project Management']
+                };
+            }
+
+            initializeEventListeners() {
+                // Name field with confetti and typing indicator
+                const nameField = document.getElementById('name');
+                let nameTypingTimer;
+
+                nameField.addEventListener('input', (e) => {
+                    const typingIndicator = document.getElementById('nameTyping');
+                    typingIndicator.classList.add('active');
+                    
+                    clearTimeout(nameTypingTimer);
+                    nameTypingTimer = setTimeout(() => {
+                        typingIndicator.classList.remove('active');
+                        this.handleNameInput(e.target.value);
+                    }, 1000);
+                });
+
+                nameField.addEventListener('focus', () => {
+                    this.addFloatingElements(['✨', '🌟', '💫'], 5);
+                });
+
+                // Email field with validation
+                document.getElementById('email').addEventListener('input', (e) => {
+                    this.handleEmailInput(e.target.value);
+                });
+
+                // Role field with dynamic skills
+                document.getElementById('role').addEventListener('change', (e) => {
+                    this.handleRoleChange(e.target.value);
+                });
+
+                // Company field with industry detection
+                document.getElementById('company').addEventListener('input', (e) => {
+                    this.handleCompanyInput(e.target.value);
+                });
+
+                // Experience field with level indicators
+                document.getElementById('experience').addEventListener('change', (e) => {
+                    this.handleExperienceChange(e.target.value);
+                });
+
+                // Form submission
+                document.getElementById('personalityForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleSubmission();
+                });
+
+                // Dynamic background color based on completion
+                this.updateProgress();
+            }
+
+            handleNameInput(value) {
+                const indicator = document.getElementById('nameIndicator');
+                
+                if (value.length > 0) {
+                    this.triggerConfetti();
+                    indicator.textContent = '👋';
+                    indicator.classList.add('active');
+                    this.formData.name = value;
+                    this.addInsight('👋', `Welcome ${value.split(' ')[0]}! Great to meet you.`);
+                } else {
+                    indicator.classList.remove('active');
+                    delete this.formData.name;
+                }
+                this.updateProgress();
+            }
+
+            handleEmailInput(value) {
+                const indicator = document.getElementById('emailIndicator');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (emailRegex.test(value)) {
+                    indicator.textContent = '✅';
+                    indicator.classList.add('active');
+                    this.formData.email = value;
+                    this.addInsight('📧', 'Valid email format detected. We\'ll keep in touch!');
+                } else if (value.length > 0) {
+                    indicator.textContent = '⚠️';
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                    delete this.formData.email;
+                }
+                this.updateProgress();
+            }
+
+            handleRoleChange(value) {
+                const indicator = document.getElementById('roleIndicator');
+                const skillTags = document.getElementById('skillTags');
+                
+                if (value) {
+                    const roleEmojis = {
+                        developer: '💻',
+                        designer: '🎨',
+                        manager: '📊',
+                        marketing: '📈',
+                        sales: '🤝',
+                        analyst: '📊',
+                        artist: '🎭',
+                        writer: '✍️',
+                        engineer: '⚙️',
+                        consultant: '💼'
+                    };
+                    
+                    indicator.textContent = roleEmojis[value] || '💼';
+                    indicator.classList.add('active');
+                    this.formData.role = value;
+                    
+                    // Show relevant skills
+                    const skills = this.roleSkills[value] || [];
+                    this.displaySkillTags(skills);
+                    this.addInsight(roleEmojis[value], `${value.charAt(0).toUpperCase() + value.slice(1)} role detected. Exciting choice!`);
+                    
+                    // Change background gradient based on role
+                    this.updateDynamicBackground(value);
+                } else {
+                    indicator.classList.remove('active');
+                    skillTags.classList.remove('active');
+                    delete this.formData.role;
+                }
+                this.updateProgress();
+            }
+
+            handleCompanyInput(value) {
+                const indicator = document.getElementById('companyIndicator');
+                
+                if (value.length > 0) {
+                    // Detect well-known companies
+                    const techCompanies = ['google', 'microsoft', 'apple', 'amazon', 'meta', 'netflix', 'adobe', 'salesforce'];
+                    const istech = techCompanies.some(company => value.toLowerCase().includes(company));
+                    
+                    indicator.textContent = istech ? '🚀' : '🏢';
+                    indicator.classList.add('active');
+                    this.formData.company = value;
+                    
+                    if (istech) {
+                        this.addInsight('🚀', 'Tech company detected! Innovation at its finest.');
+                    } else {
+                        this.addInsight('🏢', `${value} sounds like a great place to work!`);
+                    }
+                } else {
+                    indicator.classList.remove('active');
+                    delete this.formData.company;
+                }
+                this.updateProgress();
+            }
+
+            handleExperienceChange(value) {
+                const indicator = document.getElementById('experienceIndicator');
+                
+                if (value) {
+                    const experienceEmojis = {
+                        entry: '🌱',
+                        junior: '🌿',
+                        mid: '🌳',
+                        senior: '🦉',
+                        expert: '🏆'
+                    };
+                    
+                    const experienceMessages = {
+                        entry: 'Fresh perspective and eagerness to learn!',
+                        junior: 'Building solid foundations and growing fast!',
+                        mid: 'Perfect balance of experience and adaptability!',
+                        senior: 'Seasoned professional with deep expertise!',
+                        expert: 'Industry veteran with invaluable insights!'
+                    };
+                    
+                    indicator.textContent = experienceEmojis[value];
+                    indicator.classList.add('active');
+                    this.formData.experience = value;
+                    this.addInsight(experienceEmojis[value], experienceMessages[value]);
+                } else {
+                    indicator.classList.remove('active');
+                    delete this.formData.experience;
+                }
+                this.updateProgress();
+            }
+
+            displaySkillTags(skills) {
+                const skillTags = document.getElementById('skillTags');
+                skillTags.innerHTML = '';
+                
+                skills.forEach((skill, index) => {
+                    setTimeout(() => {
+                        const tag = document.createElement('span');
+                        tag.className = 'skill-tag';
+                        tag.textContent = skill;
+                        skillTags.appendChild(tag);
+                    }, index * 100);
+                });
+                
+                skillTags.classList.add('active');
+            }
+
+            addInsight(icon, message) {
+                const insightsList = document.getElementById('insightsList');
+                const insights = document.getElementById('formInsights');
+                
+                // Remove existing insight with same icon to prevent duplicates
+                const existingInsight = Array.from(insightsList.children).find(
+                    child => child.querySelector('.insight-icon').textContent === icon
+                );
+                if (existingInsight) {
+                    existingInsight.remove();
+                }
+                
+                const insightItem = document.createElement('div');
+                insightItem.className = 'insight-item';
+                insightItem.innerHTML = `
+                    <span class="insight-icon">${icon}</span>
+                    <span>${message}</span>
+                `;
+                insightsList.appendChild(insightItem);
+                insights.classList.add('active');
+            }
+
+            updateProgress() {
+                const completedFields = Object.keys(this.formData).length;
+                const progress = (completedFields / this.fieldCount) * 100;
+                
+                document.querySelector('.progress-fill').style.width = `${progress}%`;
+                
+                // Update form title based on progress
+                const title = document.querySelector('.form-title');
+                if (progress === 100) {
+                    title.textContent = '🎉 Application Complete!';
+                    title.style.transform = 'scale(1.05)';
+                } else if (progress > 60) {
+                    title.textContent = 'Almost There! 💪';
+                } else if (progress > 30) {
+                    title.textContent = 'Making Progress! 📈';
+                } else {
+                    title.textContent = 'Creative Application';
+                    title.style.transform = 'scale(1)';
+                }
+            }
+
+            updateDynamicBackground(role) {
+                const background = document.querySelector('.dynamic-background');
+                const gradients = {
+                    developer: 'linear-gradient(45deg, #667eea, #764ba2, #f093fb)',
+                    designer: 'linear-gradient(45deg, #ff9a9e, #fecfef, #fecfef)',
+                    manager: 'linear-gradient(45deg, #a8edea, #fed6e3, #d299c2)',
+                    marketing: 'linear-gradient(45deg, #ffecd2, #fcb69f, #ff8177)',
+                    sales: 'linear-gradient(45deg, #89f7fe, #66a6ff, #667eea)',
+                    analyst: 'linear-gradient(45deg, #c2e9fb, #a1c4fd, #667eea)',
+                    artist: 'linear-gradient(45deg, #ff9a9e, #fad0c4, #a8edea)',
+                    writer: 'linear-gradient(45deg, #f6d365, #fda085, #fd746c)',
+                    engineer: 'linear-gradient(45deg, #667eea, #764ba2, #89f7fe)',
+                    consultant: 'linear-gradient(45deg, #d299c2, #fef9d7, #667eea)'
+                };
+                
+                background.style.background = gradients[role] || gradients.developer;
+            }
+
+            triggerConfetti() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#fd79a8'];
+                const container = document.querySelector('.form-container');
+                
+                for (let i = 0; i < 15; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                        container.appendChild(confetti);
+                        
+                        setTimeout(() => confetti.remove(), 3000);
+                    }, i * 50);
+                }
+            }
+
+            addFloatingElements(elements, count) {
+                const container = document.querySelector('.floating-elements');
+                
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        const element = document.createElement('div');
+                        element.className = 'floating-element';
+                        element.textContent = elements[Math.floor(Math.random() * elements.length)];
+                        element.style.left = Math.random() * 90 + '%';
+                        element.style.top = Math.random() * 90 + '%';
+                        element.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                        container.appendChild(element);
+                        
+                        requestAnimationFrame(() => {
+                            element.classList.add('active');
+                        });
+                        
+                        setTimeout(() => {
+                            element.classList.remove('active');
+                            setTimeout(() => element.remove(), 600);
+                        }, 2000);
+                    }, i * 200);
+                }
+            }
+
+            handleSubmission() {
+                if (Object.keys(this.formData).length === this.fieldCount) {
+                    this.triggerCompletionCelebration();
+                    
+                    setTimeout(() => {
+                        alert('🎉 Application submitted successfully! Thank you for the engaging experience.');
+                    }, 1000);
+                } else {
+                    alert('Please complete all fields to submit your application.');
+                }
+            }
+
+            triggerCompletionCelebration() {
+                const celebration = document.getElementById('celebrationContainer');
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#fd79a8', '#ff7675', '#74b9ff'];
+                
+                // Create massive confetti explosion
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.width = Math.random() * 15 + 8 + 'px';
+                        confetti.style.height = confetti.style.width;
+                        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                        celebration.appendChild(confetti);
+                        
+                        setTimeout(() => confetti.remove(), 4000);
+                    }, i * 20);
+                }
+                
+                // Add floating success message
+                setTimeout(() => {
+                    const successMessage = document.createElement('div');
+                    successMessage.innerHTML = '🎉 Application Complete! 🎉';
+                    successMessage.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        font-size: 3rem;
+                        font-weight: bold;
+                        color: #667eea;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                        z-index: 1001;
+                        animation: successBounce 2s ease-out forwards;
+                        pointer-events: none;
+                    `;
+                    
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes successBounce {
+                            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+                            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    celebration.appendChild(successMessage);
+                    
+                    setTimeout(() => {
+                        successMessage.remove();
+                        style.remove();
+                    }, 2000);
+                }, 500);
+            }
+        }
+
+        // Initialize the form personality system
+        document.addEventListener('DOMContentLoaded', () => {
+            new FormPersonality();
+        });
+
+        // Add some extra interactive touches
+        document.addEventListener('mousemove', (e) => {
+            const formContainer = document.querySelector('.form-container');
+            const rect = formContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                const xPercent = (x / rect.width - 0.5) * 20;
+                const yPercent = (y / rect.height - 0.5) * 20;
+                formContainer.style.transform = `perspective(1000px) rotateY(${xPercent}deg) rotateX(${-yPercent}deg)`;
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            const formContainer = document.querySelector('.form-container');
+            formContainer.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg)';
+        });
+
+        // Add keyboard shortcuts for enhanced UX
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        document.querySelector('.submit-btn').click();
+                        break;
+                }
+            }
+        });
+
+        // Add responsive animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'slideInUp 0.6s ease forwards';
+                }
+            });
+        }, observerOptions);
+
+        // Observe form groups for scroll animations
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.form-group').forEach(group => {
+                observer.observe(group);
+            });
+        });
+    </script>
+</body>
+</html>
